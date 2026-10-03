@@ -27,7 +27,7 @@ export function AddEntryForm() {
       if (res?.error) {
         alert(res.error)
       } else if (res?.success) {
-        router.push(`/bill/${res.transactionId}`)
+        router.push(`/bill/${res.transactionId}?mode=admin`)
       }
     })
   }
