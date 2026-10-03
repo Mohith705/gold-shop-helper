@@ -123,3 +123,23 @@ export async function deleteTransaction(transactionId: string) {
   revalidatePath('/')
   return { success: true }
 }
+
+export async function handleLogin(formData: FormData) {
+  const username = formData.get('username')
+  const password = formData.get('password')
+
+  if (username === 'raja' && password === 'gold1987') {
+    const { cookies } = await import('next/headers')
+    const cookieStore = await cookies()
+    cookieStore.set('admin_auth', 'authenticated', { 
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24 * 7 // 1 week
+    })
+    const { redirect } = await import('next/navigation')
+    redirect('/')
+  } else {
+    const { redirect } = await import('next/navigation')
+    redirect('/login?error=invalid')
+  }
+}

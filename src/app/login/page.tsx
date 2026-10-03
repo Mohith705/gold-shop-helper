@@ -1,28 +1,16 @@
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
-import { Lock } from 'lucide-react'
+'use client'
 
-async function handleLogin(formData: FormData) {
-  'use server'
-  const username = formData.get('username')
-  const password = formData.get('password')
+import { useState } from 'react'
+import { Lock, Eye, EyeOff } from 'lucide-react'
+import { handleLogin } from '@/app/actions'
+import { useSearchParams } from 'next/navigation'
+import { Suspense } from 'react'
 
-  if (username === 'raja' && password === 'gold1987') {
-    const cookieStore = await cookies()
-    cookieStore.set('admin_auth', 'authenticated', { 
-      httpOnly: true, 
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 24 * 7 // 1 week
-    })
-    redirect('/')
-  } else {
-    redirect('/login?error=invalid')
-  }
-}
+function LoginFormComponent() {
+  const searchParams = useSearchParams()
+  const error = searchParams.get('error')
+  const [showPassword, setShowPassword] = useState(false)
 
-export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
-  const resolvedSearchParams = await searchParams
-  
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
@@ -40,7 +28,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-gray-100">
           <form action={handleLogin} className="space-y-6">
-            {resolvedSearchParams?.error === 'invalid' && (
+            {error === 'invalid' && (
               <div className="bg-red-50 border border-red-200 text-red-600 text-sm p-3 rounded-md text-center">
                 Invalid username or password
               </div>
@@ -53,20 +41,27 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
                   name="username"
                   type="text"
                   required
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 />
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700">Password</label>
-              <div className="mt-1">
+              <div className="mt-1 relative">
                 <input
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className="appearance-none block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               </div>
             </div>
 
@@ -82,5 +77,13 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50" />}>
+      <LoginFormComponent />
+    </Suspense>
   )
 }
