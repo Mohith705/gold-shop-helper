@@ -2,12 +2,32 @@
 
 import { GoldTransaction } from '@/types'
 import Link from 'next/link'
-import { PlusCircle, ReceiptText, User } from 'lucide-react'
+import { PlusCircle, ReceiptText, User, Search, Filter } from 'lucide-react'
+import { useState } from 'react'
 
 export function Dashboard({ initialTransactions }: { initialTransactions: GoldTransaction[] }) {
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortBy, setSortBy] = useState('date_desc')
+
+  // Filter and sort transactions
+  const filteredTransactions = initialTransactions.filter(tx => {
+    const query = searchQuery.toLowerCase()
+    return (
+      tx.customers?.name?.toLowerCase().includes(query) ||
+      tx.customers?.phone?.toLowerCase().includes(query) ||
+      tx.item_name.toLowerCase().includes(query)
+    )
+  }).sort((a, b) => {
+    if (sortBy === 'date_desc') return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    if (sortBy === 'date_asc') return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    if (sortBy === 'amount_desc') return b.total_amount - a.total_amount
+    if (sortBy === 'amount_asc') return a.total_amount - b.total_amount
+    return 0
+  })
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-xl font-semibold text-gray-800">Recent Transactions</h2>
         <Link 
           href="/add-entry" 
@@ -18,12 +38,39 @@ export function Dashboard({ initialTransactions }: { initialTransactions: GoldTr
         </Link>
       </div>
 
+      {/* Filters Bar */}
+      <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4 justify-between items-center">
+        <div className="relative w-full md:w-96">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+          <input 
+            type="text"
+            placeholder="Search by name, phone, or item..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
+          />
+        </div>
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <Filter className="text-gray-400" size={18} />
+          <select 
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="w-full md:w-auto border border-gray-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer bg-white"
+          >
+            <option value="date_desc">Newest First</option>
+            <option value="date_asc">Oldest First</option>
+            <option value="amount_desc">Highest Amount</option>
+            <option value="amount_asc">Lowest Amount</option>
+          </select>
+        </div>
+      </div>
+
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        {initialTransactions.length === 0 ? (
+        {filteredTransactions.length === 0 ? (
           <div className="p-12 text-center text-gray-500">
             <ReceiptText className="mx-auto h-12 w-12 text-gray-300 mb-4" />
             <p className="text-lg font-medium text-gray-900">No transactions found</p>
-            <p className="mt-1">Get started by creating a new entry.</p>
+            <p className="mt-1">Try adjusting your search or create a new entry.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -39,7 +86,7 @@ export function Dashboard({ initialTransactions }: { initialTransactions: GoldTr
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {initialTransactions.map((tx) => (
+                {filteredTransactions.map((tx) => (
                   <tr key={tx.id} className="hover:bg-gray-50/50 transition-colors">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
@@ -58,13 +105,20 @@ export function Dashboard({ initialTransactions }: { initialTransactions: GoldTr
                     <td className="p-4 text-gray-500 text-sm">
                       {new Date(tx.created_at).toLocaleDateString('en-IN')}
                     </td>
-                    <td className="p-4 text-right">
+                    <td className="p-4 text-right space-x-4 whitespace-nowrap">
                       <Link 
-                        href={`/bill/${tx.id}`}
+                        href={`/transaction/${tx.id}`}
                         className="text-indigo-600 hover:text-indigo-900 text-sm font-medium hover:underline inline-flex items-center gap-1"
                       >
+                        <User size={16} />
+                        View
+                      </Link>
+                      <Link 
+                        href={`/bill/${tx.id}`}
+                        className="text-gray-500 hover:text-gray-900 text-sm font-medium hover:underline inline-flex items-center gap-1"
+                      >
                         <ReceiptText size={16} />
-                        View Bill
+                        Bill
                       </Link>
                     </td>
                   </tr>

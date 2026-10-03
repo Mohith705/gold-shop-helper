@@ -15,6 +15,7 @@ export type GoldTransaction = {
   wastage_percentage: number;
   gold_rate_per_gram: number;
   making_charges: number;
+  hsn_code: string;
   net_weight: number;
   taxable_amount: number;
   cgst_amount: number;

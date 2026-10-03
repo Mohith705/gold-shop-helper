@@ -11,6 +11,7 @@ export async function addCustomerAndTransaction(formData: FormData) {
   const address = formData.get('address') as string
 
   const itemName = formData.get('item_name') as string
+  const hsnCode = formData.get('hsn_code') as string || '7113'
   const weightGrams = parseFloat(formData.get('weight_grams') as string)
   const wastagePercentage = parseFloat(formData.get('wastage_percentage') as string)
   const ratePerGram = parseFloat(formData.get('gold_rate_per_gram') as string)
@@ -42,6 +43,7 @@ export async function addCustomerAndTransaction(formData: FormData) {
     .insert({
       customer_id: customer.id,
       item_name: itemName,
+      hsn_code: hsnCode,
       weight_grams: weightGrams,
       wastage_percentage: wastagePercentage,
       gold_rate_per_gram: ratePerGram,
@@ -76,4 +78,32 @@ export async function addCustomerAndTransaction(formData: FormData) {
 
   revalidatePath('/')
   return { success: true, transactionId: transaction.id }
+}
+
+export async function addPayment(formData: FormData) {
+  const supabase = await createClient()
+  
+  const transactionId = formData.get('transaction_id') as string
+  const amountPaid = parseFloat(formData.get('amount_paid') as string)
+  const paymentMethod = formData.get('payment_method') as string
+  
+  if (!transactionId || amountPaid <= 0) {
+    return { error: 'Invalid payment details' }
+  }
+
+  const { error } = await supabase
+    .from('payments')
+    .insert({
+      transaction_id: transactionId,
+      amount_paid: amountPaid,
+      payment_method: paymentMethod
+    })
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  revalidatePath(`/transaction/${transactionId}`)
+  revalidatePath(`/bill/${transactionId}`)
+  return { success: true }
 }

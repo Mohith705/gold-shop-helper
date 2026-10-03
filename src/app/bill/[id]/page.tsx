@@ -1,12 +1,33 @@
 import { createClient } from '@/utils/supabase/server'
-import { ArrowLeft, Printer } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { PrintButton } from './PrintButton'
+
+// Helper function to convert numbers to words
+function numberToWords(num: number): string {
+  const a = ['','one ','two ','three ','four ', 'five ','six ','seven ','eight ','nine ','ten ','eleven ','twelve ','thirteen ','fourteen ','fifteen ','sixteen ','seventeen ','eighteen ','nineteen '];
+  const b = ['', '', 'twenty','thirty','forty','fifty', 'sixty','seventy','eighty','ninety'];
+
+  if ((num = num || 0) === 0) return 'zero';
+  
+  const n = ('000000000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+  if (!n) return ''; 
+  
+  let str = '';
+  str += (n[1] != '00') ? (a[Number(n[1])] || b[n[1][0] as any] + ' ' + a[n[1][1] as any]) + 'crore ' : '';
+  str += (n[2] != '00') ? (a[Number(n[2])] || b[n[2][0] as any] + ' ' + a[n[2][1] as any]) + 'lakh ' : '';
+  str += (n[3] != '00') ? (a[Number(n[3])] || b[n[3][0] as any] + ' ' + a[n[3][1] as any]) + 'thousand ' : '';
+  str += (n[4] != '0') ? (a[Number(n[4])] || b[n[4][0] as any] + ' ' + a[n[4][1] as any]) + 'hundred ' : '';
+  str += (n[5] != '00') ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0] as any] + ' ' + a[n[5][1] as any]) : '';
+  
+  return str.trim() + ' rupees only';
+}
 
 export default async function BillPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
 
-  // Wait for the route params to resolve in Next.js 15+ (if using newer Next.js version)
+  // Wait for the route params to resolve
   const { id } = await params
 
   if (!id) return notFound()
@@ -22,102 +43,204 @@ export default async function BillPage({ params }: { params: Promise<{ id: strin
   }
 
   const customer = transaction.customers
+  const payments = transaction.payments || []
+  const totalPaid = payments.reduce((sum: number, p: any) => sum + Number(p.amount_paid), 0)
+  const balanceDue = transaction.total_amount - totalPaid
+  
+  const totalAmountRounded = Math.round(transaction.total_amount)
+  const amountInWords = numberToWords(totalAmountRounded)
 
   return (
     <main className="min-h-screen bg-gray-50 text-slate-900 p-8 print:p-0 print:bg-white">
-      <div className="max-w-3xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-6">
         <header className="flex justify-between items-center print:hidden">
           <Link href="/" className="text-gray-500 hover:text-gray-900 inline-flex items-center gap-2 text-sm font-medium">
             <ArrowLeft size={16} /> Back to Dashboard
           </Link>
-          <button 
-            className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 px-4 py-2 rounded-xl flex items-center gap-2 font-medium transition-colors"
-          >
-            <Printer size={18} /> Print Bill
-          </button>
+          <div className="flex items-center gap-3">
+            {customer?.phone && (
+              <a 
+                href={`https://wa.me/91${customer.phone.replace(/\D/g, '').slice(-10)}?text=${encodeURIComponent(`Hello ${customer.name},\n\nThank you for shopping with Lakshmi Suma Jewellery!\n\nHere are your bill details:\nInvoice No: INV-${transaction.id.split('-')[0].toUpperCase()}\nItem: ${transaction.item_name}\nNet Weight: ${transaction.net_weight.toFixed(3)}g\n\nTotal Amount: ₹${transaction.total_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}\nAmount Paid: ₹${totalPaid.toLocaleString('en-IN', { minimumFractionDigits: 2 })}\nBalance Due: ₹${balanceDue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}\n\nView and Download your Bill here:\n${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/bill/${transaction.id}\n\nRegards,\nLakshmi Suma Jewellery`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-green-100 text-green-700 hover:bg-green-200 px-4 py-2 rounded-xl flex items-center gap-2 font-medium transition-colors"
+              >
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" className="css-i6dzq1"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                WhatsApp Bill
+              </a>
+            )}
+            <PrintButton 
+              customerName={customer?.name || 'Customer'}
+              itemName={transaction.item_name}
+              date={new Date(transaction.created_at).toLocaleDateString('en-IN')}
+            />
+          </div>
         </header>
 
-        <div className="bg-white p-10 rounded-2xl shadow-sm border border-gray-100 print:shadow-none print:border-none print:p-0">
-          {/* Bill Header */}
-          <div className="text-center mb-10 pb-6 border-b border-gray-200">
-            <h1 className="text-4xl font-bold text-gray-900">MOHITH JEWELLERS</h1>
-            <p className="text-gray-500 mt-2">123 Gold Market, Main Street, City</p>
-            <p className="text-gray-500">GSTIN: 22AAAAA0000A1Z5 | Ph: +91 9876543210</p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-8 mb-10 text-sm">
-            <div>
-              <p className="text-gray-500 mb-1">Billed To:</p>
-              <h2 className="text-lg font-semibold text-gray-900">{customer?.name}</h2>
-              {customer?.phone && <p className="text-gray-600">Ph: {customer.phone}</p>}
-              {customer?.address && <p className="text-gray-600 mt-1 whitespace-pre-wrap">{customer.address}</p>}
-            </div>
-            <div className="text-right">
-              <p className="text-gray-500 mb-1">Invoice Details:</p>
-              <p className="font-semibold text-gray-900">No: INV-{transaction.id.split('-')[0].toUpperCase()}</p>
-              <p className="text-gray-600">Date: {new Date(transaction.created_at).toLocaleDateString('en-IN')}</p>
-            </div>
-          </div>
-
-          {/* Itemized Table */}
-          <table className="w-full text-left border-collapse mb-10">
-            <thead>
-              <tr className="border-b-2 border-gray-900 text-sm font-semibold text-gray-900">
-                <th className="pb-3">Description</th>
-                <th className="pb-3 text-right">Gross Wt.</th>
-                <th className="pb-3 text-right">Wastage</th>
-                <th className="pb-3 text-right">Net Wt.</th>
-                <th className="pb-3 text-right">Rate/g</th>
-                <th className="pb-3 text-right">Value</th>
-              </tr>
-            </thead>
-            <tbody className="text-sm">
-              <tr className="border-b border-gray-200">
-                <td className="py-4 font-medium text-gray-900">{transaction.item_name}</td>
-                <td className="py-4 text-right text-gray-700">{transaction.weight_grams.toFixed(3)}g</td>
-                <td className="py-4 text-right text-gray-700">{transaction.wastage_percentage}%</td>
-                <td className="py-4 text-right text-gray-700">{transaction.net_weight.toFixed(3)}g</td>
-                <td className="py-4 text-right text-gray-700">₹{transaction.gold_rate_per_gram.toLocaleString('en-IN')}</td>
-                <td className="py-4 text-right font-medium text-gray-900">
-                  ₹{(transaction.net_weight * transaction.gold_rate_per_gram).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          {/* Summary */}
-          <div className="flex justify-end mb-12">
-            <div className="w-1/2 space-y-3 text-sm">
-              <div className="flex justify-between text-gray-600">
-                <span>Value of Goods:</span>
-                <span>₹{(transaction.net_weight * transaction.gold_rate_per_gram).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+        {/* Bill Container */}
+        <div className="bg-white rounded-xl shadow-sm print:shadow-none font-sans text-sm border-2 border-blue-800 p-1 print:border-none print:p-0">
+          <div className="border border-blue-800">
+            {/* Header section */}
+            <div className="grid grid-cols-3 p-4 border-b border-blue-800 text-blue-900">
+              <div className="text-xs font-semibold">
+                GSTIN : 37AHZPB2125M1ZZ
               </div>
-              <div className="flex justify-between text-gray-600">
-                <span>Making Charges:</span>
-                <span>₹{transaction.making_charges.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+              <div className="text-center font-bold">
+                <div className="text-sm">TAX INVOICE</div>
+                <div className="text-xs">CASH / CREDIT</div>
               </div>
-              <div className="flex justify-between font-medium text-gray-900 border-t border-gray-100 pt-3">
-                <span>Taxable Amount:</span>
-                <span>₹{transaction.taxable_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-              </div>
-              <div className="flex justify-between text-gray-600">
-                <span>CGST (1.5%):</span>
-                <span>₹{transaction.cgst_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-              </div>
-              <div className="flex justify-between text-gray-600">
-                <span>SGST (1.5%):</span>
-                <span>₹{transaction.sgst_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-              </div>
-              <div className="flex justify-between text-lg font-bold text-gray-900 border-t-2 border-gray-900 pt-3">
-                <span>Grand Total:</span>
-                <span>₹{transaction.total_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+              <div className="text-right text-xs">
+                <div>Original / Duplicate / Triplicate</div>
+                <div>Ph. : 7981032009</div>
               </div>
             </div>
-          </div>
+            
+            {/* Shop Name */}
+            <div className="text-center py-2 border-b border-blue-800 text-blue-900">
+              <h1 className="text-3xl font-bold tracking-wide">LAKSHMI SUMA JEWELLERY</h1>
+              <p className="text-xs font-semibold mt-1">Shop no 17, baburao complex, mandapala veedhi, nellore - 524 001</p>
+            </div>
 
-          <div className="text-center text-xs text-gray-500 border-t border-gray-200 pt-6">
-            <p>Thank you for shopping with Mohith Jewellers.</p>
-            <p>Subject to City Jurisdiction. E.&O.E.</p>
+            {/* Customer & Invoice Details Grid */}
+            <div className="grid grid-cols-2 text-blue-900 text-sm">
+              {/* Left Col */}
+              <div className="border-r border-blue-800">
+                <div className="grid grid-cols-[80px_1fr] border-b border-blue-800">
+                  <div className="p-1 px-2 border-r border-blue-800">Name</div>
+                  <div className="p-1 px-2 font-medium text-black">{customer?.name}</div>
+                </div>
+                <div className="grid grid-cols-[80px_1fr] border-b border-blue-800 min-h-[40px]">
+                  <div className="p-1 px-2 border-r border-blue-800">Address</div>
+                  <div className="p-1 px-2 font-medium text-black">{customer?.address}</div>
+                </div>
+                <div className="grid grid-cols-[80px_1fr] border-b border-blue-800">
+                  <div className="p-1 px-2 border-r border-blue-800">GSTIN</div>
+                  <div className="p-1 px-2 font-medium text-black"></div>
+                </div>
+                <div className="grid grid-cols-[80px_1fr_60px_1fr]">
+                  <div className="p-1 px-2 border-r border-blue-800">State</div>
+                  <div className="p-1 px-2 border-r border-blue-800 font-medium text-black">AP</div>
+                  <div className="p-1 px-2 border-r border-blue-800">Code</div>
+                  <div className="p-1 px-2 font-medium text-black">37</div>
+                </div>
+              </div>
+
+              {/* Right Col */}
+              <div>
+                <div className="grid grid-cols-[120px_1fr] border-b border-blue-800">
+                  <div className="p-1 px-2 border-r border-blue-800">Invoice No.</div>
+                  <div className="p-1 px-2 font-medium text-black">{transaction.id.split('-')[0].toUpperCase()}</div>
+                </div>
+                <div className="grid grid-cols-[120px_1fr] border-b border-blue-800">
+                  <div className="p-1 px-2 border-r border-blue-800">Invoice Date</div>
+                  <div className="p-1 px-2 font-medium text-black">{new Date(transaction.created_at).toLocaleDateString('en-IN')}</div>
+                </div>
+                <div className="grid grid-cols-[120px_1fr] border-b border-blue-800">
+                  <div className="p-1 px-2 border-r border-blue-800">Transport Mode</div>
+                  <div className="p-1 px-2 font-medium text-black">By hand</div>
+                </div>
+                <div className="grid grid-cols-[120px_1fr]">
+                  <div className="p-1 px-2 border-r border-blue-800">Vehicle No.</div>
+                  <div className="p-1 px-2 font-medium text-black"></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Table Header */}
+            <div className="grid grid-cols-[1fr_60px_80px_80px_80px_120px] border-y border-blue-800 text-blue-900 text-xs font-semibold text-center divide-x divide-blue-800">
+              <div className="p-2">Product Description</div>
+              <div className="p-2">HSN Code</div>
+              <div className="p-2">Gross WT<br/>(IN GRAM)</div>
+              <div className="p-2">Net WT<br/>(IN GRAM)</div>
+              <div className="p-2">Rate<br/>Per Gram</div>
+              <div className="p-2">Taxable Value</div>
+            </div>
+
+            {/* Table Body (min-height for layout) */}
+            <div className="grid grid-cols-[1fr_60px_80px_80px_80px_120px] min-h-[300px] text-black divide-x divide-blue-800 text-sm">
+              <div className="p-2">{transaction.item_name}</div>
+              <div className="p-2 text-center">{transaction.hsn_code || '7113'}</div>
+              <div className="p-2 text-right">{transaction.weight_grams.toFixed(3)}</div>
+              <div className="p-2 text-right">{transaction.net_weight.toFixed(3)}</div>
+              <div className="p-2 text-right">{transaction.gold_rate_per_gram}</div>
+              <div className="p-2 text-right">{transaction.taxable_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+            </div>
+
+            {/* Footer Calculation Section */}
+            <div className="grid grid-cols-[1fr_360px] border-t border-blue-800 text-sm">
+              {/* Left Side: Amount in Words, Adhaar, PAN */}
+              <div className="border-r border-blue-800 text-blue-900 flex flex-col justify-between">
+                <div className="p-3">
+                  <div className="flex gap-2">
+                    <span className="whitespace-nowrap">Total Invoice Amount in words :</span>
+                    <span className="text-black capitalize border-b border-dotted border-black flex-1">{amountInWords}</span>
+                  </div>
+                </div>
+                
+                <div className="mt-auto space-y-0">
+                  <div className="grid grid-cols-[80px_1fr] border-t border-blue-800">
+                    <div className="p-2 border-r border-blue-800">Adhaar No. :</div>
+                    <div className="p-2 font-medium text-black"></div>
+                  </div>
+                  <div className="grid grid-cols-[80px_1fr] border-t border-blue-800">
+                    <div className="p-2 border-r border-blue-800">PAN No. :</div>
+                    <div className="p-2 font-medium text-black"></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Side: Tax Breakdown */}
+              <div className="divide-y divide-blue-800 text-blue-900">
+                <div className="grid grid-cols-[1fr_120px] divide-x divide-blue-800">
+                  <div className="p-2">Total Amount Before Tax :</div>
+                  <div className="p-2 text-right font-medium text-black">{transaction.taxable_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                </div>
+                <div className="grid grid-cols-[1fr_120px] divide-x divide-blue-800">
+                  <div className="p-2">Add CGST (1.5%) :</div>
+                  <div className="p-2 text-right font-medium text-black">{transaction.cgst_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                </div>
+                <div className="grid grid-cols-[1fr_120px] divide-x divide-blue-800">
+                  <div className="p-2">Add SGST (1.5%) :</div>
+                  <div className="p-2 text-right font-medium text-black">{transaction.sgst_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                </div>
+                <div className="grid grid-cols-[1fr_120px] divide-x divide-blue-800">
+                  <div className="p-2">Add IGST :</div>
+                  <div className="p-2 text-right font-medium text-black"></div>
+                </div>
+                <div className="grid grid-cols-[1fr_120px] divide-x divide-blue-800">
+                  <div className="p-2 font-bold">Total Amount After Tax :</div>
+                  <div className="p-2 text-right font-bold text-black">{transaction.total_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                </div>
+                {(() => {
+                  const totalPaid = transaction.payments?.reduce((sum: number, p: any) => sum + Number(p.amount_paid), 0) || 0;
+                  const balanceDue = transaction.total_amount - totalPaid;
+                  return (
+                    <>
+                      <div className="grid grid-cols-[1fr_120px] divide-x divide-blue-800 border-t border-blue-800">
+                        <div className="p-2 font-medium text-green-700">Amount Paid :</div>
+                        <div className="p-2 text-right font-medium text-green-700">{totalPaid.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                      </div>
+                      <div className="grid grid-cols-[1fr_120px] divide-x divide-blue-800 border-t border-blue-800">
+                        <div className="p-2 font-bold text-red-600">Balance Due :</div>
+                        <div className="p-2 text-right font-bold text-red-600">{balanceDue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+            </div>
+
+            {/* Signature Section */}
+            <div className="grid grid-cols-2 border-t border-blue-800 text-blue-900 text-center text-sm h-24 relative">
+              <div className="border-r border-blue-800 flex flex-col justify-end p-2">
+                Customer Signature
+              </div>
+              <div className="flex flex-col justify-between p-2">
+                <div className="font-bold">For LAKSHMI SUMA JEWELLERY</div>
+                <div>Authorised Signatory</div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>

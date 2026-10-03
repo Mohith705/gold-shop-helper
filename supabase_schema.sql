@@ -22,6 +22,7 @@ CREATE TABLE gold_transactions (
   wastage_percentage NUMERIC(5, 2) NOT NULL,
   gold_rate_per_gram NUMERIC(10, 2) NOT NULL,
   making_charges NUMERIC(10, 2) DEFAULT 0,
+  hsn_code VARCHAR(20) DEFAULT '7113',
   
   -- Calculated Fields (can also be calculated on frontend, but good to store)
   net_weight NUMERIC(10, 3) NOT NULL,
