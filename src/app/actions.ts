@@ -107,3 +107,19 @@ export async function addPayment(formData: FormData) {
   revalidatePath(`/bill/${transactionId}`)
   return { success: true }
 }
+
+export async function deleteTransaction(transactionId: string) {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('gold_transactions')
+    .delete()
+    .eq('id', transactionId)
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  revalidatePath('/')
+  return { success: true }
+}

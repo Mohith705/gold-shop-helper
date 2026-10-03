@@ -3,6 +3,7 @@ import { ArrowLeft, ReceiptText, PlusCircle } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { PaymentForm } from './PaymentForm'
+import { DeleteButton } from './DeleteButton'
 
 export default async function TransactionDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
@@ -33,12 +34,15 @@ export default async function TransactionDetailsPage({ params }: { params: Promi
           <Link href="/" className="text-gray-500 hover:text-gray-900 inline-flex items-center gap-2 text-sm font-medium">
             <ArrowLeft size={16} /> Back to Dashboard
           </Link>
-          <Link 
-            href={`/bill/${transaction.id}?mode=admin`}
-            className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 px-4 py-2 rounded-xl flex items-center gap-2 font-medium transition-colors"
-          >
-            <ReceiptText size={18} /> View Bill
-          </Link>
+          <div className="flex items-center gap-3">
+            <DeleteButton transactionId={transaction.id} />
+            <Link 
+              href={`/bill/${transaction.id}?mode=admin`}
+              className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 px-4 py-2 rounded-xl flex items-center gap-2 font-medium transition-colors"
+            >
+              <ReceiptText size={18} /> View Bill
+            </Link>
+          </div>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
