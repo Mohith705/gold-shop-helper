@@ -78,9 +78,10 @@ export default async function BillPage({ params }: { params: Promise<{ id: strin
         </header>
 
         {/* Bill Container */}
-        <div className="bg-white rounded-xl shadow-sm print:shadow-none font-sans text-sm border-2 border-blue-800 p-1 print:border-none print:p-0">
-          <div className="border border-blue-800">
-            {/* Header section */}
+        <div className="overflow-x-auto -mx-8 px-8 print:mx-0 print:px-0">
+          <div className="min-w-[800px] bg-white rounded-xl shadow-sm print:shadow-none font-sans text-sm border-2 border-blue-800 p-1 print:border-none print:p-0">
+            <div className="border border-blue-800">
+              {/* Header section */}
             <div className="grid grid-cols-3 p-4 border-b border-blue-800 text-blue-900">
               <div className="text-xs font-semibold">
                 GSTIN : 37AHZPB2125M1ZZ
@@ -242,6 +243,7 @@ export default async function BillPage({ params }: { params: Promise<{ id: strin
             </div>
 
           </div>
+        </div>
         </div>
       </div>
     </main>
