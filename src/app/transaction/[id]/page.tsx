@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { PaymentForm } from './PaymentForm'
 import { DeleteButton } from './DeleteButton'
+import { Pencil } from 'lucide-react'
 
 export default async function TransactionDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
@@ -35,6 +36,12 @@ export default async function TransactionDetailsPage({ params }: { params: Promi
             <ArrowLeft size={16} /> Back to Dashboard
           </Link>
           <div className="flex items-center gap-3">
+            <Link 
+              href={`/transaction/${transaction.id}/edit`}
+              className="bg-gray-100 text-gray-700 hover:bg-gray-200 px-4 py-2 rounded-xl flex items-center gap-2 font-medium transition-colors"
+            >
+              <Pencil size={18} /> Edit
+            </Link>
             <DeleteButton transactionId={transaction.id} />
             <Link 
               href={`/bill/${transaction.id}?mode=admin`}
