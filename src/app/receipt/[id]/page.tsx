@@ -4,9 +4,18 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { PrintButton } from '../../bill/[id]/PrintButton'
 
-export default async function ReceiptPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ReceiptPage({ 
+  params,
+  searchParams
+}: { 
+  params: Promise<{ id: string }>,
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
   const supabase = await createClient()
   const { id } = await params
+  
+  const resolvedSearchParams = await searchParams
+  const isAdmin = resolvedSearchParams?.mode === 'admin'
 
   if (!id) return notFound()
 
@@ -30,14 +39,18 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
   const balanceDue = transaction.total_amount - totalPaid
 
   return (
-    <main className="min-h-screen bg-gray-50 text-slate-900 p-8 print:p-0 print:bg-white">
-      <div className="max-w-xl mx-auto space-y-6">
-        <header className="flex justify-between items-center print:hidden">
-          <Link href={`/transaction/${transaction.id}`} className="text-gray-500 hover:text-gray-900 inline-flex items-center gap-2 text-sm font-medium">
-            <ArrowLeft size={16} /> Back to Transaction
-          </Link>
+    <main className="min-h-screen bg-gray-50 text-slate-900 p-8 print:p-0 print:bg-white flex flex-col items-center">
+      <div className="w-full max-w-xl space-y-6">
+        <header className="flex justify-between items-center print:hidden w-full">
+          <div>
+            {isAdmin && (
+              <Link href={`/transaction/${transaction.id}`} className="text-gray-500 hover:text-gray-900 inline-flex items-center gap-2 text-sm font-medium">
+                <ArrowLeft size={16} /> Back to Transaction
+              </Link>
+            )}
+          </div>
           <div className="flex items-center gap-3">
-            {customer?.phone && (
+            {(isAdmin && customer?.phone) && (
               <a 
                 href={`https://wa.me/91${customer.phone.replace(/\D/g, '').slice(-10)}?text=${encodeURIComponent(`Hello ${customer.name},\n\nWe have received your payment of ₹${payment.amount_paid.toLocaleString('en-IN', { minimumFractionDigits: 2 })} towards Invoice INV-${transaction.id.split('-')[0].toUpperCase()}.\n\nTotal Invoice Amount: ₹${transaction.total_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}\nTotal Amount Paid: ₹${totalPaid.toLocaleString('en-IN', { minimumFractionDigits: 2 })}\nCurrent Balance Due: ₹${balanceDue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}\n\nView and Download your Receipt here:\n${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/receipt/${payment.id}\n\nThank you!\nLakshmi Suma Jewellery`)}`}
                 target="_blank"

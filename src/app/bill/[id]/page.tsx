@@ -24,11 +24,19 @@ function numberToWords(num: number): string {
   return str.trim() + ' rupees only';
 }
 
-export default async function BillPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function BillPage({ 
+  params,
+  searchParams
+}: { 
+  params: Promise<{ id: string }>,
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
   const supabase = await createClient()
 
   // Wait for the route params to resolve
   const { id } = await params
+  const resolvedSearchParams = await searchParams
+  const isAdmin = resolvedSearchParams?.mode === 'admin'
 
   if (!id) return notFound()
 
@@ -51,14 +59,18 @@ export default async function BillPage({ params }: { params: Promise<{ id: strin
   const amountInWords = numberToWords(totalAmountRounded)
 
   return (
-    <main className="min-h-screen bg-gray-50 text-slate-900 p-8 print:p-0 print:bg-white">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <header className="flex justify-between items-center print:hidden">
-          <Link href="/" className="text-gray-500 hover:text-gray-900 inline-flex items-center gap-2 text-sm font-medium">
-            <ArrowLeft size={16} /> Back to Dashboard
-          </Link>
+    <main className="min-h-screen bg-gray-50 text-slate-900 p-8 print:p-0 print:bg-white flex flex-col items-center">
+      <div className="w-full max-w-4xl space-y-6">
+        <header className="flex justify-between items-center print:hidden w-full">
+          <div>
+            {isAdmin && (
+              <Link href="/" className="text-gray-500 hover:text-gray-900 inline-flex items-center gap-2 text-sm font-medium">
+                <ArrowLeft size={16} /> Back to Dashboard
+              </Link>
+            )}
+          </div>
           <div className="flex items-center gap-3">
-            {customer?.phone && (
+            {(isAdmin && customer?.phone) && (
               <a 
                 href={`https://wa.me/91${customer.phone.replace(/\D/g, '').slice(-10)}?text=${encodeURIComponent(`Hello ${customer.name},\n\nThank you for shopping with Lakshmi Suma Jewellery!\n\nHere are your bill details:\nInvoice No: INV-${transaction.id.split('-')[0].toUpperCase()}\nItem: ${transaction.item_name}\nNet Weight: ${transaction.net_weight.toFixed(3)}g\n\nTotal Amount: ₹${transaction.total_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}\nAmount Paid: ₹${totalPaid.toLocaleString('en-IN', { minimumFractionDigits: 2 })}\nBalance Due: ₹${balanceDue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}\n\nView and Download your Bill here:\n${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/bill/${transaction.id}\n\nRegards,\nLakshmi Suma Jewellery`)}`}
                 target="_blank"

@@ -34,7 +34,7 @@ export default async function TransactionDetailsPage({ params }: { params: Promi
             <ArrowLeft size={16} /> Back to Dashboard
           </Link>
           <Link 
-            href={`/bill/${transaction.id}`}
+            href={`/bill/${transaction.id}?mode=admin`}
             className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 px-4 py-2 rounded-xl flex items-center gap-2 font-medium transition-colors"
           >
             <ReceiptText size={18} /> View Bill
@@ -120,7 +120,7 @@ export default async function TransactionDetailsPage({ params }: { params: Promi
                         <span>₹{Number(p.amount_paid).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
                         <div className="flex gap-2 items-center">
                           <span className="text-xs px-2 py-1 bg-gray-100 rounded-md text-gray-600">{p.payment_method}</span>
-                          <Link href={`/receipt/${p.id}`} className="text-indigo-600 hover:text-indigo-900 ml-2" title="View Receipt">
+                          <Link href={`/receipt/${p.id}?mode=admin`} className="text-indigo-600 hover:text-indigo-900 ml-2" title="View Receipt">
                             <ReceiptText size={16} />
                           </Link>
                         </div>

@@ -114,7 +114,7 @@ export function Dashboard({ initialTransactions }: { initialTransactions: GoldTr
                         View
                       </Link>
                       <Link 
-                        href={`/bill/${tx.id}`}
+                        href={`/bill/${tx.id}?mode=admin`}
                         className="text-gray-500 hover:text-gray-900 text-sm font-medium hover:underline inline-flex items-center gap-1"
                       >
                         <ReceiptText size={16} />
