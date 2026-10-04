@@ -150,9 +150,9 @@ export default async function BatchBillsPage({ searchParams }: { searchParams: P
                     <div className="grid grid-cols-[1fr_60px_80px_80px_80px_120px] min-h-[300px] text-black divide-x divide-blue-800 text-sm">
                       <div className="p-2">{transaction.item_name}</div>
                       <div className="p-2 text-center">{transaction.hsn_code || '7113'}</div>
-                      <div className="p-2 text-right">{isLumpSum ? '-' : transaction.weight_grams?.toFixed(3)}</div>
-                      <div className="p-2 text-right">{isLumpSum ? '-' : transaction.net_weight?.toFixed(3)}</div>
-                      <div className="p-2 text-right">{isLumpSum ? '-' : transaction.gold_rate_per_gram}</div>
+                      <div className="p-2 text-right">{transaction.weight_grams ? transaction.weight_grams.toFixed(3) : '-'}</div>
+                      <div className="p-2 text-right">{transaction.net_weight ? transaction.net_weight.toFixed(3) : '-'}</div>
+                      <div className="p-2 text-right">{transaction.gold_rate_per_gram || '-'}</div>
                       <div className="p-2 text-right">{transaction.taxable_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
                     </div>
 

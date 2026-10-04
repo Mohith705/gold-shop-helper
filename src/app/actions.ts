@@ -12,10 +12,10 @@ export async function addCustomerAndTransaction(formData: FormData) {
 
   const itemName = formData.get('item_name') as string
   const hsnCode = formData.get('hsn_code') as string || '7113'
-  const weightGrams = parseFloat(formData.get('weight_grams') as string)
-  const wastagePercentage = parseFloat(formData.get('wastage_percentage') as string)
-  const ratePerGram = parseFloat(formData.get('gold_rate_per_gram') as string)
-  const makingCharges = parseFloat(formData.get('making_charges') as string || '0')
+  const weightGrams = parseFloat(formData.get('weight_grams') as string) || 0
+  const wastagePercentage = parseFloat(formData.get('wastage_percentage') as string) || 0
+  const ratePerGram = parseFloat(formData.get('gold_rate_per_gram') as string) || 0
+  const makingCharges = parseFloat(formData.get('making_charges') as string) || 0
   const amountPaid = parseFloat(formData.get('amount_paid') as string || '0')
   const paymentMethod = formData.get('payment_method') as string || 'Cash'
 
@@ -35,7 +35,8 @@ export async function addCustomerAndTransaction(formData: FormData) {
   const lumpSumAmount = parseFloat(formData.get('lump_sum_amount') as string || '0')
 
   // Calculate fields
-  let netWeight = 0, taxableAmount = 0, cgstAmount = 0, sgstAmount = 0, totalAmount = 0
+  let netWeight = weightGrams + (weightGrams * (wastagePercentage / 100))
+  let taxableAmount = 0, cgstAmount = 0, sgstAmount = 0, totalAmount = 0
 
   if (isLumpSum) {
     if (gstIncluded) {
@@ -48,7 +49,6 @@ export async function addCustomerAndTransaction(formData: FormData) {
     cgstAmount = taxableAmount * 0.015
     sgstAmount = taxableAmount * 0.015
   } else {
-    netWeight = weightGrams + (weightGrams * (wastagePercentage / 100))
     taxableAmount = (netWeight * ratePerGram) + makingCharges
     cgstAmount = taxableAmount * 0.015 // 1.5%
     sgstAmount = taxableAmount * 0.015 // 1.5%
@@ -176,10 +176,10 @@ export async function updateCustomerAndTransaction(formData: FormData) {
 
   const itemName = formData.get('item_name') as string
   const hsnCode = formData.get('hsn_code') as string || '7113'
-  const weightGrams = parseFloat(formData.get('weight_grams') as string)
-  const wastagePercentage = parseFloat(formData.get('wastage_percentage') as string)
-  const ratePerGram = parseFloat(formData.get('gold_rate_per_gram') as string)
-  const makingCharges = parseFloat(formData.get('making_charges') as string || '0')
+  const weightGrams = parseFloat(formData.get('weight_grams') as string) || 0
+  const wastagePercentage = parseFloat(formData.get('wastage_percentage') as string) || 0
+  const ratePerGram = parseFloat(formData.get('gold_rate_per_gram') as string) || 0
+  const makingCharges = parseFloat(formData.get('making_charges') as string) || 0
 
   const isLumpSum = formData.get('is_lump_sum') === 'true'
   const gstIncluded = formData.get('gst_included') === 'true'
@@ -196,7 +196,8 @@ export async function updateCustomerAndTransaction(formData: FormData) {
   }
 
   // Calculate fields
-  let netWeight = 0, taxableAmount = 0, cgstAmount = 0, sgstAmount = 0, totalAmount = 0
+  let netWeight = weightGrams + (weightGrams * (wastagePercentage / 100))
+  let taxableAmount = 0, cgstAmount = 0, sgstAmount = 0, totalAmount = 0
 
   if (isLumpSum) {
     if (gstIncluded) {
@@ -209,7 +210,6 @@ export async function updateCustomerAndTransaction(formData: FormData) {
     cgstAmount = taxableAmount * 0.015
     sgstAmount = taxableAmount * 0.015
   } else {
-    netWeight = weightGrams + (weightGrams * (wastagePercentage / 100))
     taxableAmount = (netWeight * ratePerGram) + makingCharges
     cgstAmount = taxableAmount * 0.015 // 1.5%
     sgstAmount = taxableAmount * 0.015 // 1.5%

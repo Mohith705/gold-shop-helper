@@ -101,7 +101,7 @@ export function EditEntryForm({ transaction }: { transaction: any }) {
             <input defaultValue={transaction.hsn_code} name="hsn_code" type="text" className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-gray-900" />
           </div>
           
-          {isLumpSum ? (
+          {isLumpSum && (
             <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Total Cost (₹)</label>
@@ -114,26 +114,24 @@ export function EditEntryForm({ transaction }: { transaction: any }) {
                 </label>
               </div>
             </div>
-          ) : (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Gross Weight (grams)</label>
-                <input required name="weight_grams" type="number" step="0.001" value={weight} onChange={e => setWeight(parseFloat(e.target.value) || 0)} className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-gray-900" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Wastage (%)</label>
-                <input required name="wastage_percentage" type="number" step="0.01" value={wastage} onChange={e => setWastage(parseFloat(e.target.value) || 0)} className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-gray-900" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Gold Rate (per gram)</label>
-                <input required name="gold_rate_per_gram" type="number" step="0.01" value={rate} onChange={e => setRate(parseFloat(e.target.value) || 0)} className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-gray-900" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Making Charges (₹)</label>
-                <input name="making_charges" type="number" step="0.01" value={makingCharges} onChange={e => setMakingCharges(parseFloat(e.target.value) || 0)} className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-gray-900" />
-              </div>
-            </>
           )}
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Gross Weight (grams) {isLumpSum && <span className="text-gray-400 font-normal">(Optional)</span>}</label>
+            <input required={!isLumpSum} name="weight_grams" type="number" step="0.001" value={weight} onChange={e => setWeight(parseFloat(e.target.value) || 0)} className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-gray-900" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Wastage (%) {isLumpSum && <span className="text-gray-400 font-normal">(Optional)</span>}</label>
+            <input required={!isLumpSum} name="wastage_percentage" type="number" step="0.01" value={wastage} onChange={e => setWastage(parseFloat(e.target.value) || 0)} className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-gray-900" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Gold Rate (per gram) {isLumpSum && <span className="text-gray-400 font-normal">(Optional)</span>}</label>
+            <input required={!isLumpSum} name="gold_rate_per_gram" type="number" step="0.01" value={rate} onChange={e => setRate(parseFloat(e.target.value) || 0)} className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-gray-900" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Making Charges (₹) {isLumpSum && <span className="text-gray-400 font-normal">(Optional)</span>}</label>
+            <input name="making_charges" type="number" step="0.01" value={makingCharges} onChange={e => setMakingCharges(parseFloat(e.target.value) || 0)} className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors text-gray-900" />
+          </div>
         </div>
       </section>
 
