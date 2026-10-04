@@ -42,3 +42,5 @@ CREATE TABLE payments (
   payment_method VARCHAR(50) NOT NULL,
   payment_date TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+ALTER TABLE gold_transactions ADD COLUMN is_lump_sum BOOLEAN DEFAULT FALSE;
+ALTER TABLE gold_transactions ADD COLUMN gst_included BOOLEAN DEFAULT FALSE;

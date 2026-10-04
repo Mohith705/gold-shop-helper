@@ -2,7 +2,7 @@
 
 import { GoldTransaction } from '@/types'
 import Link from 'next/link'
-import { PlusCircle, ReceiptText, User, Search, Filter } from 'lucide-react'
+import { PlusCircle, ReceiptText, User, Search, Filter, FileText } from 'lucide-react'
 import { useState } from 'react'
 
 export function Dashboard({ initialTransactions }: { initialTransactions: GoldTransaction[] }) {
@@ -29,13 +29,22 @@ export function Dashboard({ initialTransactions }: { initialTransactions: GoldTr
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-xl font-semibold text-gray-800">Recent Transactions</h2>
-        <Link 
-          href="/add-entry" 
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 transition-colors font-medium shadow-sm"
-        >
-          <PlusCircle size={18} />
-          <span>New Entry</span>
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link 
+            href="/reports" 
+            className="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-xl flex items-center gap-2 transition-colors font-medium shadow-sm"
+          >
+            <FileText size={18} />
+            <span>Reports</span>
+          </Link>
+          <Link 
+            href="/add-entry" 
+            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 transition-colors font-medium shadow-sm"
+          >
+            <PlusCircle size={18} />
+            <span>New Entry</span>
+          </Link>
+        </div>
       </div>
 
       {/* Filters Bar */}

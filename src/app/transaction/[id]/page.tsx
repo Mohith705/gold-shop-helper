@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { PaymentForm } from './PaymentForm'
 import { DeleteButton } from './DeleteButton'
-import { Pencil } from 'lucide-react'
+import { Pencil, FileSpreadsheet } from 'lucide-react'
 
 export default async function TransactionDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
@@ -44,8 +44,14 @@ export default async function TransactionDetailsPage({ params }: { params: Promi
             </Link>
             <DeleteButton transactionId={transaction.id} />
             <Link 
+              href={`/statement/${transaction.id}`}
+              className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-4 py-2 rounded-xl flex items-center gap-2 font-medium transition-colors"
+            >
+              <FileSpreadsheet size={18} /> Statement
+            </Link>
+            <Link 
               href={`/bill/${transaction.id}?mode=admin`}
-              className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 px-4 py-2 rounded-xl flex items-center gap-2 font-medium transition-colors"
+              className="bg-indigo-600 text-white hover:bg-indigo-700 px-4 py-2 rounded-xl flex items-center gap-2 font-medium transition-colors shadow-sm"
             >
               <ReceiptText size={18} /> View Bill
             </Link>

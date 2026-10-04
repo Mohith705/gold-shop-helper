@@ -13,13 +13,32 @@ export function AddEntryForm() {
   const [wastage, setWastage] = useState<number>(0)
   const [rate, setRate] = useState<number>(0)
   const [makingCharges, setMakingCharges] = useState<number>(0)
+  
+  // Lump Sum States
+  const [isLumpSum, setIsLumpSum] = useState<boolean>(false)
+  const [gstIncluded, setGstIncluded] = useState<boolean>(false)
+  const [lumpSumAmount, setLumpSumAmount] = useState<number>(0)
 
   // Calculations
-  const netWeight = weight + (weight * (wastage / 100))
-  const taxableAmount = (netWeight * rate) + makingCharges
-  const cgst = taxableAmount * 0.015
-  const sgst = taxableAmount * 0.015
-  const totalAmount = taxableAmount + cgst + sgst
+  let netWeight = 0, taxableAmount = 0, cgst = 0, sgst = 0, totalAmount = 0
+
+  if (isLumpSum) {
+    if (gstIncluded) {
+      taxableAmount = lumpSumAmount / 1.03
+      totalAmount = lumpSumAmount
+    } else {
+      taxableAmount = lumpSumAmount
+      totalAmount = lumpSumAmount * 1.03
+    }
+    cgst = taxableAmount * 0.015
+    sgst = taxableAmount * 0.015
+  } else {
+    netWeight = weight + (weight * (wastage / 100))
+    taxableAmount = (netWeight * rate) + makingCharges
+    cgst = taxableAmount * 0.015
+    sgst = taxableAmount * 0.015
+    totalAmount = taxableAmount + cgst + sgst
+  }
 
   async function handleSubmit(formData: FormData) {
     startTransition(async () => {
@@ -34,6 +53,16 @@ export function AddEntryForm() {
 
   return (
     <form action={handleSubmit} className="space-y-8">
+      <input type="hidden" name="is_lump_sum" value={isLumpSum.toString()} />
+      <input type="hidden" name="gst_included" value={gstIncluded.toString()} />
+
+      <div className="flex justify-center mb-6">
+        <div className="bg-gray-100 p-1 rounded-xl inline-flex">
+          <button type="button" onClick={() => setIsLumpSum(false)} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${!isLumpSum ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}>Detailed Entry</button>
+          <button type="button" onClick={() => setIsLumpSum(true)} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isLumpSum ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-900'}`}>Total Cost (Lump Sum)</button>
+        </div>
+      </div>
+
       {/* Customer Section */}
       <section className="space-y-4">
         <h3 className="text-lg font-medium text-gray-900 border-b pb-2">Customer Details</h3>
@@ -65,22 +94,40 @@ export function AddEntryForm() {
             <label className="block text-sm font-medium text-gray-700 mb-1">HSN Code</label>
             <input name="hsn_code" type="text" defaultValue="7113" className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Gross Weight (grams)</label>
-            <input required name="weight_grams" type="number" step="0.001" value={weight || ''} onChange={e => setWeight(parseFloat(e.target.value) || 0)} className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Wastage (%)</label>
-            <input required name="wastage_percentage" type="number" step="0.01" value={wastage || ''} onChange={e => setWastage(parseFloat(e.target.value) || 0)} className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Gold Rate (per gram)</label>
-            <input required name="gold_rate_per_gram" type="number" step="0.01" value={rate || ''} onChange={e => setRate(parseFloat(e.target.value) || 0)} className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Making Charges (₹)</label>
-            <input name="making_charges" type="number" step="0.01" value={makingCharges || ''} onChange={e => setMakingCharges(parseFloat(e.target.value) || 0)} className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" />
-          </div>
+          
+          {isLumpSum ? (
+            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Total Cost (₹)</label>
+                <input required name="lump_sum_amount" type="number" step="0.01" value={lumpSumAmount || ''} onChange={e => setLumpSumAmount(parseFloat(e.target.value) || 0)} className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors bg-white" />
+              </div>
+              <div className="flex items-center pt-6">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={gstIncluded} onChange={e => setGstIncluded(e.target.checked)} className="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                  <span className="text-sm font-medium text-gray-700">Does this include 3% GST?</span>
+                </label>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Gross Weight (grams)</label>
+                <input required name="weight_grams" type="number" step="0.001" value={weight || ''} onChange={e => setWeight(parseFloat(e.target.value) || 0)} className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Wastage (%)</label>
+                <input required name="wastage_percentage" type="number" step="0.01" value={wastage || ''} onChange={e => setWastage(parseFloat(e.target.value) || 0)} className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Gold Rate (per gram)</label>
+                <input required name="gold_rate_per_gram" type="number" step="0.01" value={rate || ''} onChange={e => setRate(parseFloat(e.target.value) || 0)} className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Making Charges (₹)</label>
+                <input name="making_charges" type="number" step="0.01" value={makingCharges || ''} onChange={e => setMakingCharges(parseFloat(e.target.value) || 0)} className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" />
+              </div>
+            </>
+          )}
         </div>
       </section>
 
