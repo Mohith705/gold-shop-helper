@@ -41,7 +41,7 @@ export function ReportsFilter({ initialFrom, initialTo }: { initialFrom: string,
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-indigo-500 focus:border-indigo-500"
         />
       </div>
-      <div className="flex items-center gap-2 w-full sm:w-auto">
+      <div className="flex items-center gap-2 w-full sm:w-auto mt-4 sm:mt-0">
         <button 
           onClick={handleApply}
           className="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
@@ -52,7 +52,13 @@ export function ReportsFilter({ initialFrom, initialTo }: { initialFrom: string,
           onClick={handlePrint}
           className="flex-1 sm:flex-none bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
         >
-          <Printer size={16} /> Print Report
+          <Printer size={16} /> Print Summary
+        </button>
+        <button 
+          onClick={() => router.push(`/reports/bills?from=${from}&to=${to}`)}
+          className="flex-1 sm:flex-none bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+        >
+          Download All Bills
         </button>
       </div>
     </div>
