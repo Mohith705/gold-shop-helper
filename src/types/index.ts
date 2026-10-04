@@ -21,6 +21,8 @@ export type GoldTransaction = {
   cgst_amount: number;
   sgst_amount: number;
   total_amount: number;
+  is_lump_sum?: boolean;
+  gst_included?: boolean;
   created_at: string;
   customers?: Customer; // Joined relation
 };
