@@ -44,3 +44,4 @@ CREATE TABLE payments (
 );
 ALTER TABLE gold_transactions ADD COLUMN is_lump_sum BOOLEAN DEFAULT FALSE;
 ALTER TABLE gold_transactions ADD COLUMN gst_included BOOLEAN DEFAULT FALSE;
+ALTER TABLE gold_transactions ADD COLUMN invoice_number SERIAL;

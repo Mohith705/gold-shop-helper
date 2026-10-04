@@ -23,6 +23,7 @@ export type GoldTransaction = {
   total_amount: number;
   is_lump_sum?: boolean;
   gst_included?: boolean;
+  invoice_number?: number;
   created_at: string;
   customers?: Customer; // Joined relation
 };

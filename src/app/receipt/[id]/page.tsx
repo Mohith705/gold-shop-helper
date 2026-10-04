@@ -38,6 +38,12 @@ export default async function ReceiptPage({
   const totalPaid = allPayments.reduce((sum: number, p: any) => sum + Number(p.amount_paid), 0)
   const balanceDue = transaction.total_amount - totalPaid
 
+  // Calculate receipt number suffix (a, b, c...)
+  const sortedPayments = [...allPayments].sort((a, b) => new Date(a.payment_date).getTime() - new Date(b.payment_date).getTime())
+  const paymentIndex = sortedPayments.findIndex(p => p.id === payment.id)
+  const receiptSuffix = String.fromCharCode(97 + (paymentIndex >= 0 ? paymentIndex : 0))
+  const receiptNumber = `${transaction.invoice_number}${receiptSuffix}`
+
   return (
     <main className="min-h-screen bg-gray-50 text-slate-900 p-8 print:p-0 print:bg-white flex flex-col items-center">
       <div className="w-full max-w-xl space-y-6">
@@ -52,7 +58,7 @@ export default async function ReceiptPage({
           <div className="flex items-center gap-3">
             {(isAdmin && customer?.phone) && (
               <a 
-                href={`https://wa.me/91${customer.phone.replace(/\\D/g, '').slice(-10)}?text=${encodeURIComponent(`Hello ${customer.name},\n\nWe have received your payment of ₹${payment.amount_paid.toLocaleString('en-IN', { minimumFractionDigits: 2 })} towards Invoice INV-${transaction.id.split('-')[0].toUpperCase()}.\n\nTotal Invoice Amount: ₹${transaction.total_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}\nTotal Amount Paid: ₹${totalPaid.toLocaleString('en-IN', { minimumFractionDigits: 2 })}\nCurrent Balance Due: ₹${balanceDue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}\n\nThank you!\nLakshmi Suma Jewellery`)}`}
+                href={`https://wa.me/91${customer.phone.replace(/\\D/g, '').slice(-10)}?text=${encodeURIComponent(`Hello ${customer.name},\n\nWe have received your payment of ₹${payment.amount_paid.toLocaleString('en-IN', { minimumFractionDigits: 2 })} towards Invoice INV-${transaction.invoice_number}.\n\nTotal Invoice Amount: ₹${transaction.total_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}\nTotal Amount Paid: ₹${totalPaid.toLocaleString('en-IN', { minimumFractionDigits: 2 })}\nCurrent Balance Due: ₹${balanceDue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}\n\nThank you!\nLakshmi Suma Jewellery`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-green-100 text-green-700 hover:bg-green-200 px-4 py-2 rounded-xl flex items-center gap-2 font-medium transition-colors"
@@ -77,7 +83,7 @@ export default async function ReceiptPage({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <span className="text-gray-500 block text-xs uppercase tracking-wider mb-1">Receipt No</span>
-                <span className="font-medium text-gray-900">REC-{payment.id.split('-')[0].toUpperCase()}</span>
+                <span className="font-medium text-gray-900">REC-{receiptNumber}</span>
               </div>
               <div>
                 <span className="text-gray-500 block text-xs uppercase tracking-wider mb-1">Date</span>
@@ -94,7 +100,7 @@ export default async function ReceiptPage({
             </div>
             
             <div className="mt-6 pt-6 border-t border-gray-100">
-              <span className="text-gray-500 block text-xs uppercase tracking-wider mb-3">Item Details (Against Invoice INV-{transaction.id.split('-')[0].toUpperCase()})</span>
+              <span className="text-gray-500 block text-xs uppercase tracking-wider mb-3">Item Details (Against Invoice INV-{transaction.invoice_number})</span>
               <div className="bg-gray-50 rounded-lg p-4 grid grid-cols-2 gap-y-3 gap-x-4 text-xs">
                 <div className="col-span-2">
                   <span className="text-gray-500 mr-2">Item:</span>

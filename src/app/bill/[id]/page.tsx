@@ -72,7 +72,7 @@ export default async function BillPage({
           <div className="flex items-center gap-3">
             {(isAdmin && customer?.phone) && (
               <a 
-                href={`https://wa.me/91${customer.phone.replace(/\\D/g, '').slice(-10)}?text=${encodeURIComponent(`Hello ${customer.name},\n\nThank you for shopping with Lakshmi Suma Jewellery!\n\nHere are your bill details:\nInvoice No: INV-${transaction.id.split('-')[0].toUpperCase()}\nItem: ${transaction.item_name}\nNet Weight: ${transaction.net_weight.toFixed(3)}g\n\nTotal Amount: ₹${transaction.total_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}\nAmount Paid: ₹${totalPaid.toLocaleString('en-IN', { minimumFractionDigits: 2 })}\nBalance Due: ₹${balanceDue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}\n\nRegards,\nLakshmi Suma Jewellery`)}`}
+                href={`https://wa.me/91${customer.phone.replace(/\\D/g, '').slice(-10)}?text=${encodeURIComponent(`Hello ${customer.name},\n\nThank you for shopping with Lakshmi Suma Jewellery!\n\nHere are your bill details:\nInvoice No: INV-${transaction.invoice_number}\nItem: ${transaction.item_name}\nNet Weight: ${transaction.net_weight.toFixed(3)}g\n\nTotal Amount: ₹${transaction.total_amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}\nAmount Paid: ₹${totalPaid.toLocaleString('en-IN', { minimumFractionDigits: 2 })}\nBalance Due: ₹${balanceDue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}\n\nRegards,\nLakshmi Suma Jewellery`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-green-100 text-green-700 hover:bg-green-200 px-4 py-2 rounded-xl flex items-center gap-2 font-medium transition-colors"
@@ -142,7 +142,7 @@ export default async function BillPage({
               <div>
                 <div className="grid grid-cols-[120px_1fr] border-b border-blue-800">
                   <div className="p-1 px-2 border-r border-blue-800">Invoice No.</div>
-                  <div className="p-1 px-2 font-medium text-black">{transaction.id.split('-')[0].toUpperCase()}</div>
+                  <div className="p-1 px-2 font-medium text-black">{transaction.invoice_number}</div>
                 </div>
                 <div className="grid grid-cols-[120px_1fr] border-b border-blue-800">
                   <div className="p-1 px-2 border-r border-blue-800">Invoice Date</div>

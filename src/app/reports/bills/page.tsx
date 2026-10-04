@@ -119,7 +119,7 @@ export default async function BatchBillsPage({ searchParams }: { searchParams: P
                       <div>
                         <div className="grid grid-cols-[120px_1fr] border-b border-blue-800">
                           <div className="p-1 px-2 border-r border-blue-800">Invoice No.</div>
-                          <div className="p-1 px-2 font-medium text-black">{transaction.id.split('-')[0].toUpperCase()}</div>
+                          <div className="p-1 px-2 font-medium text-black">{transaction.invoice_number}</div>
                         </div>
                         <div className="grid grid-cols-[120px_1fr] border-b border-blue-800">
                           <div className="p-1 px-2 border-r border-blue-800">Invoice Date</div>
