@@ -6,7 +6,7 @@ export function PrintButton() {
   return (
     <button 
       onClick={() => window.print()}
-      className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 font-medium shadow-sm transition-all"
+      className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 font-medium shadow-sm transition-all"
     >
       <Printer size={18} /> Print Statement
     </button>

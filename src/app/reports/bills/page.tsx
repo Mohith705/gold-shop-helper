@@ -42,7 +42,7 @@ export default async function BatchBillsPage({ searchParams }: { searchParams: P
     return (
       <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-8">
         <h2 className="text-xl text-gray-700 mb-4">No transactions found for these dates.</h2>
-        <Link href={`/reports?from=${fromDate}&to=${toDate}`} className="text-indigo-600 hover:underline">
+        <Link href={`/reports?from=${fromDate}&to=${toDate}`} className="text-amber-600 hover:underline">
           Go back to reports
         </Link>
       </main>

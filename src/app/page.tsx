@@ -15,12 +15,18 @@ export default async function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 text-slate-900 p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <header className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Gold Shop CRM</h1>
-            <p className="text-gray-500 mt-1">Manage your transactions and customers easily.</p>
+    <main className="min-h-screen bg-gradient-to-br from-[#FCFBF8] to-[#F5F2EB] text-slate-900 p-4 md:p-8 font-sans selection:bg-amber-200 selection:text-amber-900">
+      <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
+        <header className="relative overflow-hidden flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-amber-100/50">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-300 via-amber-500 to-amber-300"></div>
+          <div className="relative z-10">
+            <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-amber-700 to-amber-900 tracking-tight">
+              Lakshmi Suma Jewellery
+            </h1>
+            <p className="text-gray-500 mt-2 font-medium flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+              Official Billing & CRM System
+            </p>
           </div>
         </header>
         <Dashboard initialTransactions={(transactions as any) || []} />

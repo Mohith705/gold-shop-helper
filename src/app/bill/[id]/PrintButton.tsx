@@ -35,7 +35,7 @@ export function PrintButton({ customerName, itemName, date }: PrintButtonProps) 
   return (
     <button 
       onClick={handlePrint}
-      className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 px-4 py-2 rounded-xl flex items-center gap-2 font-medium transition-colors"
+      className="bg-amber-100 text-amber-700 hover:bg-amber-200 px-4 py-2 rounded-xl flex items-center gap-2 font-medium transition-colors"
     >
       <Printer size={18} /> Save as PDF / Print
     </button>
